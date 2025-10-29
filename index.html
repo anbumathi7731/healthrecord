@@ -1,0 +1,817 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HealthLink - Complete Health Records with Emergency Contacts</title>
+    <style>
+        :root { 
+            --primary: #2a7de1; 
+            --secondary: #34c759; 
+            --danger: #e1342a;
+            --warning: #ff9500;
+        }
+        * { margin: 0; padding: 0; box-sizing: border-box; font-family: 'Segoe UI', sans-serif; }
+        body { line-height: 1.6; color: #333; background: #f8f9fa; }
+        .container { width: 90%; max-width: 1200px; margin: 0 auto; padding: 0 15px; }
+        
+        /* Header */
+        header { background: white; box-shadow: 0 2px 10px rgba(0,0,0,0.1); position: fixed; width: 100%; top: 0; z-index: 1000; }
+        .navbar { display: flex; justify-content: space-between; align-items: center; padding: 20px 0; }
+        .logo { font-size: 1.8rem; font-weight: 700; color: var(--primary); text-decoration: none; }
+        .nav-links { display: flex; list-style: none; }
+        .nav-links li { margin-left: 20px; }
+        .nav-links a { text-decoration: none; color: #333; font-weight: 500; }
+        
+        /* Buttons */
+        .btn { padding: 12px 30px; background: var(--primary); color: white; border: none; border-radius: 4px; cursor: pointer; margin: 5px; }
+        .btn-secondary { background: var(--secondary); }
+        .btn-danger { background: var(--danger); }
+        .btn-warning { background: var(--warning); }
+        
+        /* Sections */
+        section { padding: 100px 0 50px; }
+        .hero { background: linear-gradient(135deg, var(--primary) 0%, #1a5bb0 100%); color: white; text-align: center; }
+        
+        /* Forms */
+        .health-form { background: white; padding: 30px; border-radius: 10px; margin: 20px 0; box-shadow: 0 5px 15px rgba(0,0,0,0.1); }
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; margin-bottom: 5px; font-weight: 600; }
+        .form-group input, .form-group textarea, .form-group select { 
+            width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 4px; 
+        }
+        .form-row { display: flex; gap: 15px; }
+        .form-row .form-group { flex: 1; }
+        
+        /* Records Display */
+        .record-card { border: 1px solid #ddd; padding: 20px; margin: 15px 0; border-radius: 8px; background: #f9f9f9; }
+        .record-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
+        .record-date { color: #666; font-size: 0.9em; }
+        .medication-item, .test-item, .contact-item { background: white; padding: 10px; margin: 5px 0; border-radius: 4px; border-left: 4px solid var(--primary); }
+        .emergency-section { background: #fff3cd; border: 2px solid var(--warning); border-radius: 8px; padding: 20px; margin: 15px 0; }
+        
+        /* Tabs */
+        .tabs { display: flex; background: #f5f7fa; border-radius: 8px 8px 0 0; overflow-x: auto; }
+        .tab { padding: 15px 20px; cursor: pointer; border-bottom: 3px solid transparent; white-space: nowrap; }
+        .tab.active { border-bottom: 3px solid var(--primary); background: white; font-weight: bold; }
+        .tab-content { display: none; padding: 20px; background: white; border-radius: 0 0 8px 8px; }
+        .tab-content.active { display: block; }
+        
+        /* Emergency Badge */
+        .emergency-badge { background: var(--danger); color: white; padding: 5px 10px; border-radius: 20px; font-size: 0.8em; margin-left: 10px; }
+    </style>
+</head>
+<body>
+    <header>
+        <div class="container">
+            <nav class="navbar">
+                <a href="#" class="logo">HealthLink</a>
+                <ul class="nav-links">
+                    <li><a href="#dashboard">Dashboard</a></li>
+                    <li><a href="#medical-data">Medical Data</a></li>
+                    <li><a href="#emergency">Emergency Info</a></li>
+                    <li><a href="#view-records">View Records</a></li>
+                </ul>
+            </nav>
+        </div>
+    </header>
+
+    <section class="hero">
+        <div class="container">
+            <h1>HealthLink - Complete Health Records</h1>
+            <p>Including emergency contacts and critical medical information</p>
+        </div>
+    </section>
+
+    <!-- Patient Registration -->
+    <section id="dashboard">
+        <div class="container">
+            <div class="health-form">
+                <h2>Patient Registration</h2>
+                <div class="form-group">
+                    <label>Aadhaar Number</label>
+                    <input type="text" id="aadhaar-input" placeholder="Enter 12-digit Aadhaar" maxlength="12">
+                </div>
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="patient-name" placeholder="Enter your full name">
+                </div>
+                <div class="form-group">
+                    <label>Date of Birth</label>
+                    <input type="date" id="patient-dob">
+                </div>
+                <div class="form-group">
+                    <label>Blood Group</label>
+                    <select id="blood-group">
+                        <option value="">Select Blood Group</option>
+                        <option value="A+">A+</option>
+                        <option value="A-">A-</option>
+                        <option value="B+">B+</option>
+                        <option value="B-">B-</option>
+                        <option value="O+">O+</option>
+                        <option value="O-">O-</option>
+                        <option value="AB+">AB+</option>
+                        <option value="AB-">AB-</option>
+                    </select>
+                </div>
+                <button class="btn" onclick="registerPatient()">Register Patient</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- Medical Data Entry -->
+    <section id="medical-data">
+        <div class="container">
+            <h2>Add Medical Data</h2>
+            
+            <div class="tabs">
+                <div class="tab active" onclick="switchTab('hospital')">Hospital Visit</div>
+                <div class="tab" onclick="switchTab('medication')">Medications</div>
+                <div class="tab" onclick="switchTab('tests')">Test Results</div>
+                <div class="tab" onclick="switchTab('surgery')">Surgeries</div>
+                <div class="tab" onclick="switchTab('allergy')">Allergies</div>
+            </div>
+
+            <!-- Hospital Visit Tab -->
+            <div class="tab-content active" id="hospital-tab">
+                <div class="health-form">
+                    <h3>Hospital/Clinic Visit</h3>
+                    <div class="form-group">
+                        <label>Aadhaar Number</label>
+                        <input type="text" id="visit-aadhaar" placeholder="Enter patient's Aadhaar">
+                    </div>
+                    <div class="form-group">
+                        <label>Hospital/Clinic Name</label>
+                        <input type="text" id="hospital-name" placeholder="Enter hospital name">
+                    </div>
+                    <div class="form-group">
+                        <label>Visit Date</label>
+                        <input type="date" id="visit-date">
+                    </div>
+                    <div class="form-group">
+                        <label>Diagnosis/Condition</label>
+                        <input type="text" id="diagnosis" placeholder="Enter diagnosis">
+                    </div>
+                    <div class="form-group">
+                        <label>Doctor's Notes</label>
+                        <textarea id="doctor-notes" placeholder="Enter doctor's notes and recommendations"></textarea>
+                    </div>
+                    <button class="btn" onclick="addHospitalVisit()">Add Hospital Visit</button>
+                </div>
+            </div>
+
+            <!-- Medications Tab -->
+            <div class="tab-content" id="medication-tab">
+                <div class="health-form">
+                    <h3>Medication History</h3>
+                    <div class="form-group">
+                        <label>Aadhaar Number</label>
+                        <input type="text" id="med-aadhaar" placeholder="Enter patient's Aadhaar">
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Medication Name</label>
+                            <input type="text" id="med-name" placeholder="e.g., Metformin">
+                        </div>
+                        <div class="form-group">
+                            <label>Dosage</label>
+                            <input type="text" id="med-dosage" placeholder="e.g., 500mg">
+                        </div>
+                    </div>
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Start Date</label>
+                            <input type="date" id="med-start-date">
+                        </div>
+                        <div class="form-group">
+                            <label>End Date (if completed)</label>
+                            <input type="date" id="med-end-date">
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label>Frequency</label>
+                        <input type="text" id="med-frequency" placeholder="e.g., Twice daily, After meals">
+                    </div>
+                    <div class="form-group">
+                        <label>Prescribing Doctor</label>
+                        <input type="text" id="med-doctor" placeholder="Doctor's name">
+                    </div>
+                    <button class="btn" onclick="addMedication()">Add Medication</button>
+                </div>
+            </div>
+
+            <!-- Test Results Tab -->
+            <div class="tab-content" id="tests-tab">
+                <div class="health-form">
+                    <h3>Medical Test Results</h3>
+                    <div class="form-group">
+                        <label>Aadhaar Number</label>
+                        <input type="text" id="test-aadhaar" placeholder="Enter patient's Aadhaar">
+                    </div>
+                    <div class="form-group">
+                        <label>Test Name</label>
+                        <input type="text" id="test-name" placeholder="e.g., Blood Sugar, CBC, X-Ray">
+                    </div>
+                    <div class="form-group">
+                        <label>Test Date</label>
+                        <input type="date" id="test-date">
+                    </div>
+                    <div class="form-group">
+                        <label>Test Results</label>
+                        <textarea id="test-results" placeholder="Enter test results and values"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>Normal Range</label>
+                        <input type="text" id="test-normal-range" placeholder="e.g., 70-100 mg/dL">
+                    </div>
+                    <div class="form-group">
+                        <label>Testing Lab/Hospital</label>
+                        <input type="text" id="test-lab" placeholder="Lab or hospital name">
+                    </div>
+                    <button class="btn" onclick="addTestResult()">Add Test Result</button>
+                </div>
+            </div>
+
+            <!-- Surgery Tab -->
+            <div class="tab-content" id="surgery-tab">
+                <div class="health-form">
+                    <h3>Surgery/Procedure History</h3>
+                    <div class="form-group">
+                        <label>Aadhaar Number</label>
+                        <input type="text" id="surgery-aadhaar" placeholder="Enter patient's Aadhaar">
+                    </div>
+                    <div class="form-group">
+                        <label>Surgery/Procedure Name</label>
+                        <input type="text" id="surgery-name" placeholder="e.g., Appendectomy, Cataract Surgery">
+                    </div>
+                    <div class="form-group">
+                        <label>Surgery Date</label>
+                        <input type="date" id="surgery-date">
+                    </div>
+                    <div class="form-group">
+                        <label>Hospital</label>
+                        <input type="text" id="surgery-hospital" placeholder="Hospital name">
+                    </div>
+                    <div class="form-group">
+                        <label>Surgeon</label>
+                        <input type="text" id="surgery-surgeon" placeholder="Surgeon's name">
+                    </div>
+                    <div class="form-group">
+                        <label>Notes/Complications</label>
+                        <textarea id="surgery-notes" placeholder="Any notes about the surgery"></textarea>
+                    </div>
+                    <button class="btn" onclick="addSurgery()">Add Surgery Record</button>
+                </div>
+            </div>
+
+            <!-- Allergies Tab -->
+            <div class="tab-content" id="allergy-tab">
+                <div class="health-form">
+                    <h3>Allergies & Adverse Reactions</h3>
+                    <div class="form-group">
+                        <label>Aadhaar Number</label>
+                        <input type="text" id="allergy-aadhaar" placeholder="Enter patient's Aadhaar">
+                    </div>
+                    <div class="form-group">
+                        <label>Allergy/Reaction Name</label>
+                        <input type="text" id="allergy-name" placeholder="e.g., Penicillin, Peanuts, Latex">
+                    </div>
+                    <div class="form-group">
+                        <label>Severity</label>
+                        <select id="allergy-severity">
+                            <option value="Mild">Mild</option>
+                            <option value="Moderate">Moderate</option>
+                            <option value="Severe">Severe</option>
+                            <option value="Life-threatening">Life-threatening</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Reaction Symptoms</label>
+                        <textarea id="allergy-symptoms" placeholder="e.g., Rash, Breathing difficulty, Swelling"></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label>First Identified Date</label>
+                        <input type="date" id="allergy-date">
+                    </div>
+                    <button class="btn btn-warning" onclick="addAllergy()">Add Allergy</button>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Emergency Contacts Section -->
+    <section id="emergency">
+        <div class="container">
+            <div class="health-form">
+                <h2>🚨 Emergency Contact & Information</h2>
+                <div class="form-group">
+                    <label>Aadhaar Number</label>
+                    <input type="text" id="emergency-aadhaar" placeholder="Enter patient's Aadhaar">
+                </div>
+
+                <h3>Emergency Contacts</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Primary Contact Name</label>
+                        <input type="text" id="contact1-name" placeholder="Full name">
+                    </div>
+                    <div class="form-group">
+                        <label>Relationship</label>
+                        <input type="text" id="contact1-relation" placeholder="e.g., Spouse, Parent">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        <input type="text" id="contact1-phone" placeholder="10-digit mobile number">
+                    </div>
+                    <div class="form-group">
+                        <label>Alternate Phone</label>
+                        <input type="text" id="contact1-alt-phone" placeholder="Alternate number (optional)">
+                    </div>
+                </div>
+
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Secondary Contact Name</label>
+                        <input type="text" id="contact2-name" placeholder="Full name">
+                    </div>
+                    <div class="form-group">
+                        <label>Relationship</label>
+                        <input type="text" id="contact2-relation" placeholder="e.g., Sibling, Friend">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        <input type="text" id="contact2-phone" placeholder="10-digit mobile number">
+                    </div>
+                    <div class="form-group">
+                        <label>Alternate Phone</label>
+                        <input type="text" id="contact2-alt-phone" placeholder="Alternate number (optional)">
+                    </div>
+                </div>
+
+                <h3>Primary Physician</h3>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Doctor's Name</label>
+                        <input type="text" id="doctor-name" placeholder="Primary physician name">
+                    </div>
+                    <div class="form-group">
+                        <label>Specialization</label>
+                        <input type="text" id="doctor-specialization" placeholder="e.g., Cardiologist, General Physician">
+                    </div>
+                </div>
+                <div class="form-row">
+                    <div class="form-group">
+                        <label>Phone Number</label>
+                        <input type="text" id="doctor-phone" placeholder="Clinic/hospital number">
+                    </div>
+                    <div class="form-group">
+                        <label>Hospital/Clinic</label>
+                        <input type="text" id="doctor-hospital" placeholder="Hospital name">
+                    </div>
+                </div>
+
+                <button class="btn btn-danger" onclick="saveEmergencyContacts()">Save Emergency Information</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- View Health Records -->
+    <section id="view-records">
+        <div class="container">
+            <div class="health-form">
+                <h2>View Complete Health Records</h2>
+                <div class="form-group">
+                    <label>Aadhaar Number</label>
+                    <input type="text" id="view-aadhaar" placeholder="Enter Aadhaar to view records">
+                </div>
+                <button class="btn" onclick="viewHealthRecords()">View All Records</button>
+                <button class="btn btn-danger" onclick="viewEmergencyCard()">Emergency Access</button>
+                
+                <div id="records-display" style="margin-top: 30px;"></div>
+            </div>
+        </div>
+    </section>
+
+    <script>
+        // Tab switching function - FIXED
+        function switchTab(tabName) {
+            // Hide all tab contents
+            document.querySelectorAll('.tab-content').forEach(content => {
+                content.classList.remove('active');
+            });
+            
+            // Remove active class from all tabs
+            document.querySelectorAll('.tab').forEach(tab => {
+                tab.classList.remove('active');
+            });
+            
+            // Show selected tab content
+            document.getElementById(tabName + '-tab').classList.add('active');
+            
+            // Add active class to clicked tab
+            event.target.classList.add('active');
+        }
+
+        // Set today's date as default for date fields
+        window.onload = function() {
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('visit-date').value = today;
+            document.getElementById('test-date').value = today;
+        };
+
+        // Database functions
+        function getDatabase() {
+            return JSON.parse(localStorage.getItem('healthlink_db')) || { 
+                patients: {}, 
+                hospitalVisits: {},
+                medications: {},
+                testResults: {},
+                surgeries: {},
+                allergies: {},
+                emergencyContacts: {}
+            };
+        }
+
+        function saveDatabase(db) {
+            localStorage.setItem('healthlink_db', JSON.stringify(db));
+        }
+
+        // Patient Registration
+        function registerPatient() {
+            const aadhaar = document.getElementById('aadhaar-input').value;
+            const name = document.getElementById('patient-name').value;
+            const dob = document.getElementById('patient-dob').value;
+            const bloodGroup = document.getElementById('blood-group').value;
+            
+            if (aadhaar.length !== 12) {
+                alert('Please enter valid 12-digit Aadhaar number');
+                return;
+            }
+            
+            if (!name) {
+                alert('Please enter patient name');
+                return;
+            }
+            
+            const db = getDatabase();
+            db.patients[aadhaar] = {
+                name: name,
+                dob: dob,
+                bloodGroup: bloodGroup,
+                registeredAt: new Date().toISOString()
+            };
+            saveDatabase(db);
+            alert('Patient registered successfully!');
+            
+            // Clear form
+            document.getElementById('aadhaar-input').value = '';
+            document.getElementById('patient-name').value = '';
+            document.getElementById('patient-dob').value = '';
+            document.getElementById('blood-group').value = '';
+        }
+
+        // Add Hospital Visit
+        function addHospitalVisit() {
+            const aadhaar = document.getElementById('visit-aadhaar').value;
+            const hospital = document.getElementById('hospital-name').value;
+            const visitDate = document.getElementById('visit-date').value;
+            const diagnosis = document.getElementById('diagnosis').value;
+            const notes = document.getElementById('doctor-notes').value;
+            
+            if (!aadhaar || !hospital) {
+                alert('Please fill all required fields');
+                return;
+            }
+            
+            const db = getDatabase();
+            if (!db.hospitalVisits[aadhaar]) {
+                db.hospitalVisits[aadhaar] = [];
+            }
+            
+            db.hospitalVisits[aadhaar].push({
+                hospital: hospital,
+                visitDate: visitDate,
+                diagnosis: diagnosis,
+                notes: notes,
+                addedDate: new Date().toISOString()
+            });
+            
+            saveDatabase(db);
+            alert('Hospital visit recorded successfully!');
+            
+            // Clear form
+            document.getElementById('visit-aadhaar').value = '';
+            document.getElementById('hospital-name').value = '';
+            document.getElementById('visit-date').value = new Date().toISOString().split('T')[0];
+            document.getElementById('diagnosis').value = '';
+            document.getElementById('doctor-notes').value = '';
+        }
+
+        // Add Medication
+        function addMedication() {
+            const aadhaar = document.getElementById('med-aadhaar').value;
+            const name = document.getElementById('med-name').value;
+            const dosage = document.getElementById('med-dosage').value;
+            const startDate = document.getElementById('med-start-date').value;
+            const endDate = document.getElementById('med-end-date').value;
+            const frequency = document.getElementById('med-frequency').value;
+            const doctor = document.getElementById('med-doctor').value;
+            
+            if (!aadhaar || !name || !dosage) {
+                alert('Please fill all required fields');
+                return;
+            }
+            
+            const db = getDatabase();
+            if (!db.medications[aadhaar]) {
+                db.medications[aadhaar] = [];
+            }
+            
+            db.medications[aadhaar].push({
+                name: name,
+                dosage: dosage,
+                startDate: startDate,
+                endDate: endDate || 'Ongoing',
+                frequency: frequency,
+                prescribingDoctor: doctor,
+                addedDate: new Date().toISOString()
+            });
+            
+            saveDatabase(db);
+            alert('Medication recorded successfully!');
+            
+            // Clear form
+            document.getElementById('med-aadhaar').value = '';
+            document.getElementById('med-name').value = '';
+            document.getElementById('med-dosage').value = '';
+            document.getElementById('med-start-date').value = '';
+            document.getElementById('med-end-date').value = '';
+            document.getElementById('med-frequency').value = '';
+            document.getElementById('med-doctor').value = '';
+        }
+
+        // Add Test Result
+        function addTestResult() {
+            const aadhaar = document.getElementById('test-aadhaar').value;
+            const testName = document.getElementById('test-name').value;
+            const testDate = document.getElementById('test-date').value;
+            const results = document.getElementById('test-results').value;
+            const normalRange = document.getElementById('test-normal-range').value;
+            const lab = document.getElementById('test-lab').value;
+            
+            if (!aadhaar || !testName) {
+                alert('Please fill all required fields');
+                return;
+            }
+            
+            const db = getDatabase();
+            if (!db.testResults[aadhaar]) {
+                db.testResults[aadhaar] = [];
+            }
+            
+            db.testResults[aadhaar].push({
+                testName: testName,
+                testDate: testDate,
+                results: results,
+                normalRange: normalRange,
+                lab: lab,
+                addedDate: new Date().toISOString()
+            });
+            
+            saveDatabase(db);
+            alert('Test result recorded successfully!');
+            
+            // Clear form
+            document.getElementById('test-aadhaar').value = '';
+            document.getElementById('test-name').value = '';
+            document.getElementById('test-date').value = new Date().toISOString().split('T')[0];
+            document.getElementById('test-results').value = '';
+            document.getElementById('test-normal-range').value = '';
+            document.getElementById('test-lab').value = '';
+        }
+
+        // Add Surgery
+        function addSurgery() {
+            const aadhaar = document.getElementById('surgery-aadhaar').value;
+            const surgeryName = document.getElementById('surgery-name').value;
+            const surgeryDate = document.getElementById('surgery-date').value;
+            const hospital = document.getElementById('surgery-hospital').value;
+            const surgeon = document.getElementById('surgery-surgeon').value;
+            const notes = document.getElementById('surgery-notes').value;
+            
+            if (!aadhaar || !surgeryName) {
+                alert('Please fill all required fields');
+                return;
+            }
+            
+            const db = getDatabase();
+            if (!db.surgeries[aadhaar]) {
+                db.surgeries[aadhaar] = [];
+            }
+            
+            db.surgeries[aadhaar].push({
+                surgeryName: surgeryName,
+                surgeryDate: surgeryDate,
+                hospital: hospital,
+                surgeon: surgeon,
+                notes: notes,
+                addedDate: new Date().toISOString()
+            });
+            
+            saveDatabase(db);
+            alert('Surgery recorded successfully!');
+            
+            // Clear form
+            document.getElementById('surgery-aadhaar').value = '';
+            document.getElementById('surgery-name').value = '';
+            document.getElementById('surgery-date').value = '';
+            document.getElementById('surgery-hospital').value = '';
+            document.getElementById('surgery-surgeon').value = '';
+            document.getElementById('surgery-notes').value = '';
+        }
+
+        // Add Allergy
+        function addAllergy() {
+            const aadhaar = document.getElementById('allergy-aadhaar').value;
+            const allergyName = document.getElementById('allergy-name').value;
+            const severity = document.getElementById('allergy-severity').value;
+            const symptoms = document.getElementById('allergy-symptoms').value;
+            const allergyDate = document.getElementById('allergy-date').value;
+            
+            if (!aadhaar || !allergyName) {
+                alert('Please fill all required fields');
+                return;
+            }
+            
+            const db = getDatabase();
+            if (!db.allergies[aadhaar]) {
+                db.allergies[aadhaar] = [];
+            }
+            
+            db.allergies[aadhaar].push({
+                allergyName: allergyName,
+                severity: severity,
+                symptoms: symptoms,
+                identifiedDate: allergyDate,
+                addedDate: new Date().toISOString()
+            });
+            
+            saveDatabase(db);
+            alert('Allergy recorded successfully!');
+            
+            // Clear form
+            document.getElementById('allergy-aadhaar').value = '';
+            document.getElementById('allergy-name').value = '';
+            document.getElementById('allergy-severity').value = 'Mild';
+            document.getElementById('allergy-symptoms').value = '';
+            document.getElementById('allergy-date').value = '';
+        }
+
+        // Save Emergency Contacts
+        function saveEmergencyContacts() {
+            const aadhaar = document.getElementById('emergency-aadhaar').value;
+            
+            if (!aadhaar) {
+                alert('Please enter Aadhaar number');
+                return;
+            }
+            
+            const db = getDatabase();
+            db.emergencyContacts[aadhaar] = {
+                contact1: {
+                    name: document.getElementById('contact1-name').value,
+                    relationship: document.getElementById('contact1-relation').value,
+                    phone: document.getElementById('contact1-phone').value,
+                    altPhone: document.getElementById('contact1-alt-phone').value
+                },
+                contact2: {
+                    name: document.getElementById('contact2-name').value,
+                    relationship: document.getElementById('contact2-relation').value,
+                    phone: document.getElementById('contact2-phone').value,
+                    altPhone: document.getElementById('contact2-alt-phone').value
+                },
+                primaryPhysician: {
+                    name: document.getElementById('doctor-name').value,
+                    specialization: document.getElementById('doctor-specialization').value,
+                    phone: document.getElementById('doctor-phone').value,
+                    hospital: document.getElementById('doctor-hospital').value
+                },
+                lastUpdated: new Date().toISOString()
+            };
+            
+            saveDatabase(db);
+            alert('Emergency contacts saved successfully!');
+            
+            // Clear form
+            document.getElementById('emergency-aadhaar').value = '';
+            document.getElementById('contact1-name').value = '';
+            document.getElementById('contact1-relation').value = '';
+            document.getElementById('contact1-phone').value = '';
+            document.getElementById('contact1-alt-phone').value = '';
+            document.getElementById('contact2-name').value = '';
+            document.getElementById('contact2-relation').value = '';
+            document.getElementById('contact2-phone').value = '';
+            document.getElementById('contact2-alt-phone').value = '';
+            document.getElementById('doctor-name').value = '';
+            document.getElementById('doctor-specialization').value = '';
+            document.getElementById('doctor-phone').value = '';
+            document.getElementById('doctor-hospital').value = '';
+        }
+
+        // View Health Records
+        function viewHealthRecords() {
+            const aadhaar = document.getElementById('view-aadhaar').value;
+            const db = getDatabase();
+            const display = document.getElementById('records-display');
+            
+            if (!aadhaar) {
+                alert('Please enter Aadhaar number');
+                return;
+            }
+            
+            if (!db.patients[aadhaar]) {
+                display.innerHTML = '<p style="color: red;">No patient found with this Aadhaar number.</p>';
+                return;
+            }
+            
+            const patient = db.patients[aadhaar];
+            let html = `<h3>Complete Health Records for ${patient.name}</h3>`;
+            html += `<p><strong>Date of Birth:</strong> ${patient.dob || 'Not specified'} | <strong>Blood Group:</strong> ${patient.bloodGroup || 'Not specified'}</p>`;
+            
+            // Emergency Contacts Section
+            if (db.emergencyContacts[aadhaar]) {
+                const emergency = db.emergencyContacts[aadhaar];
+                html += `
+                    <div class="emergency-section">
+                        <h4>🚨 Emergency Contacts</h4>
+                        <div style="display: flex; gap: 20px; flex-wrap: wrap;">
+                            <div class="contact-item" style="flex: 1; min-width: 200px;">
+                                <strong>${emergency.contact1.name}</strong> (${emergency.contact1.relationship})<br>
+                                📞 ${emergency.contact1.phone} ${emergency.contact1.altPhone ? '| ' + emergency.contact1.altPhone : ''}
+                            </div>
+                            <div class="contact-item" style="flex: 1; min-width: 200px;">
+                                <strong>${emergency.contact2.name}</strong> (${emergency.contact2.relationship})<br>
+                                📞 ${emergency.contact2.phone} ${emergency.contact2.altPhone ? '| ' + emergency.contact2.altPhone : ''}
+                            </div>
+                        </div>
+                        <div class="contact-item">
+                            <strong>Primary Physician:</strong> Dr. ${emergency.primaryPhysician.name} (${emergency.primaryPhysician.specialization})<br>
+                            📞 ${emergency.primaryPhysician.phone} | ${emergency.primaryPhysician.hospital}
+                        </div>
+                        <p><em>Last updated: ${new Date(emergency.lastUpdated).toLocaleDateString()}</em></p>
+                    </div>
+                `;
+            }
+            
+            // Allergies (Critical Information)
+            if (db.allergies[aadhaar] && db.allergies[aadhaar].length > 0) {
+                html += `<h4>⚠️ Allergies & Adverse Reactions</h4>`;
+                db.allergies[aadhaar].forEach(allergy => {
+                    const badgeColor = allergy.severity === 'Life-threatening' ? 'var(--danger)' : 
+                                     allergy.severity === 'Severe' ? 'var(--warning)' : 'var(--primary)';
+                    html += `
+                        <div class="record-card" style="border-left-color: ${badgeColor};">
+                            <strong>${allergy.allergyName}</strong> 
+                            <span style="background: ${badgeColor}; color: white; padding: 2px 8px; border-radius: 10px; font-size: 0.8em; margin-left: 10px;">
+                                ${allergy.severity}
+                            </span><br>
+                            <span>Symptoms: ${allergy.symptoms}</span><br>
+                            <span>Identified: ${allergy.identifiedDate}</span>
+                        </div>
+                    `;
+                });
+            }
+            
+            // Hospital Visits
+            if (db.hospitalVisits[aadhaar] && db.hospitalVisits[aadhaar].length > 0) {
+                html += `<h4>🏥 Hospital Visits</h4>`;
+                db.hospitalVisits[aadhaar].forEach(visit => {
+                    html += `
+                        <div class="record-card">
+                            <div class="record-header">
+                                <strong>${visit.hospital}</strong>
+                                <span class="record-date">Visit Date: ${visit.visitDate}</span>
+                            </div>
+                            <p><strong>Diagnosis:</strong> ${visit.diagnosis}</p>
+                            <p><strong>Notes:</strong> ${visit.notes}</p>
+                            <p><em>Recorded on: ${new Date(visit.addedDate).toLocaleDateString()}</em></p>
+                        </div>
+                    `;
+                });
+            }
+            
+            // Medications
+            if (db.medications[aadhaar] && db.medications[aadhaar].length > 0) {
+                html += `<h4>💊 Medications</h4>`;
+                db.medications[aadhaar].forEach(med => {
+                    html += `
+                        <div class="medication-item">
+                            <strong>${med.name} - ${med.dosage}</strong><br>
+                            <span>Started: ${med.startDate} | Ended: ${med.endDate}</span><br>
+                            <span>Frequency: ${med.frequency}</span><br>
+                            <span>Prescribed by: ${med.prescribingDoctor}</span>
+                        </div>
